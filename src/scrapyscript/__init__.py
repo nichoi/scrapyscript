@@ -9,6 +9,7 @@ import collections
 import inspect
 from billiard import Process  # fork of multiprocessing that works with celery
 from billiard.queues import Queue
+import logging
 
 from pydispatch import dispatcher
 from scrapy import signals
@@ -62,15 +63,23 @@ class Processor(Process):
             requests (Request) - One or more Jobs. All will
                                  be loaded into a single invocation of the reactor.
         """
+        logging.info("_crawl started")
         self.crawler = CrawlerProcess(self.settings)
+        logging.info("CrawlerProcess created")
 
         # crawl can be called multiple times to queue several requests
         for req in requests:
             self.crawler.crawl(req.spider, *req.args, **req.kwargs)
+            logging.info("self.crawler.crawl(req.spider, *req.args, **req.kwargs)")
 
         self.crawler.start()
+        logging.info("self.crawler.start()")
+
         self.crawler.stop()
+        logging.info("self.crawler.stop()")
+
         self.results.put(self.items)
+        logging.info("self.results.put(self.items) " + str(self.items))
 
     def run(self, jobs):
         """Start the Scrapy engine, and execute all jobs.  Return consolidated results
@@ -82,14 +91,21 @@ class Processor(Process):
         Returns:
           List of objects yielded by the spiders after all jobs have run.
         """
+        logging.info("run called")
+
         if not isinstance(jobs, collections.abc.Iterable):
             jobs = [jobs]
         self.validate(jobs)
+        logging.info("self.validate(jobs)")
 
         p = Process(target=self._crawl, args=[jobs])
+        logging.info("Process(target=self._crawl, args=[jobs])")
         p.start()
+        logging.info("p.start()")
         p.join()
+        logging.info("p.join()")
         p.terminate()
+        logging.info("p.terminate()")
 
         return self.results.get()
 
