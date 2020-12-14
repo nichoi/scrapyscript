@@ -7,8 +7,14 @@ spiders are returned as a list.
 
 import collections
 import inspect
-from billiard import Process  # fork of multiprocessing that works with celery
-from billiard.queues import Queue
+
+import os
+if os.getenv("USE_SCRAPY_MULTIPROCESSING") is None:
+    from multiprocessing import Process  # fork of multiprocessing that works with celery
+    from multiprocessing.queues import Queue
+else:
+    from billiard import Process  # fork of multiprocessing that works with celery
+    from billiard.queues import Queue
 import logging
 
 from pydispatch import dispatcher
