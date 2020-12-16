@@ -70,7 +70,8 @@ class Processor(Process):
                                  be loaded into a single invocation of the reactor.
         """
         logging.info("_crawl started")
-        self.crawler = CrawlerProcess(self.settings)
+        install_root_handler = os.environ.get("SCRAPY_INSTALL_ROOT_HANDLER") is not None
+        self.crawler = CrawlerProcess(self.settings, install_root_handler=install_root_handler)
         logging.info("CrawlerProcess created")
 
         # crawl can be called multiple times to queue several requests
