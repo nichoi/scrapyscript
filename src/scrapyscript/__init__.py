@@ -9,7 +9,7 @@ import collections
 import inspect
 
 import os
-if os.getenv("USE_SCRAPY_MULTIPROCESSING") is None:
+if os.getenv("USE_SCRAPY_MULTIPROCESSING") is not None:
     from multiprocessing import Process  # fork of multiprocessing that works with celery
     from multiprocessing.queues import Queue
 else:
